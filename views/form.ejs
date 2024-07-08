@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add New Image</title>
+    <%- include('./partials/head') %>
+</head>
+<body>
+    <header class="container">
+        <%- include('./partials/nav') %>
+    </header>
+    <form class="container" action="/add-image-form" method="post">
+        <label for="title">Nombre</label>
+        <input type="text" name="title" id="title" required>
+        <!-- <label for="url">Enlace</label>
+        <input type="url" name="url" id="url" required> -->
+        <input type="submit" value="Añadir">
+    </form>
+    <!-- Mostrar un mensaje de confirmación si el usuario acaba de insertar una imagen en la 'base de datos'-->
+    <% if (isImagePosted) { %>
+        <div id="message" class="container alert success">Imagen insertada correctamente</div>
+        <% } %>
+</body>
+</html>
