@@ -52,12 +52,11 @@ app.get('/add-image-form', (req, res) => {
 
         // 3. Añadir los otros campos del formulario y sus validaciones
 
-        // 4julio: Tras insertar una imagen 'dejaremos' el formulario visible 
-        // res.redirect('/add-image-form');
-        // Redirect es un método del objecto Response que permite 'redirigir' al cliente a un nuevo endpoint o vista
-
-        // Probando: Redirigir con query parameter indicando que la imagen ha sido publicada
-        res.redirect('/add-image-form?isImagePosted=true');
+        // 4julio: Tras insertar una imagen, se le avisará al usuario que se ha añadido la imagen y 'dejaremos' el formulario vacío visible.
+        res.render('form', {
+            isImagePosted: true
+        });
+        res.redirect('/add-image-form');
 })
 
 

@@ -10,9 +10,11 @@
     </header>
     <form class="container" action="/add-image-form" method="post">
         <label for="title">Nombre</label>
-        <input type="text" name="title" id="title" required>
-        <!-- <label for="url">Enlace</label>
-        <input type="url" name="url" id="url" required> -->
+        <input type="text" name="title" id="title" maxlength="30" pattern="[A-Za-z0-9 _]{1,30}"  required>
+        <label for="url">Enlace</label>
+        <input type="url" name="url" id="url" required>
+        <label for="date">Fecha</label>
+        <input type="date" name="date" id="date" required>
         <input type="submit" value="Añadir">
     </form>
     <!-- Mostrar un mensaje de confirmación si el usuario acaba de insertar una imagen en la 'base de datos'-->
