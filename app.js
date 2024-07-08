@@ -46,17 +46,14 @@ app.get('/add-image-form', (req, res) => {
         console.log(req.body)
     
         // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
-        const { title } = req.body
-        images.push({ title })
+        const { title, url, date } = req.body
+        images.push({ title, url, date })
         console.log('array de imagenes actualizado: ', images);
 
-        // 3. Añadir los otros campos del formulario y sus validaciones
-
-        // 4julio: Tras insertar una imagen, se le avisará al usuario que se ha añadido la imagen y 'dejaremos' el formulario vacío visible.
+        // 4julio: Tras insertar una imagen, se le avisará al usuario que se ha añadido la imagen 'dejaremos' el formulario visible.
         res.render('form', {
             isImagePosted: true
         });
-        res.redirect('/add-image-form');
 })
 
 

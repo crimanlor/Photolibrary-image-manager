@@ -10,8 +10,9 @@
     </header>
     <form class="container" action="/add-image-form" method="post">
         <label for="title">Nombre</label>
-        <input type="text" name="title" id="title" maxlength="30" pattern="[A-Za-z0-9 _]{1,30}"  required>
-        <label for="url">Enlace</label>
+        <!-- 3. Añadir los otros campos del formulario y sus validaciones -->
+        <input type="text" name="title" id="title" maxlength="30" pattern="[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?: [A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*" required>
+        <label for="url">URL imagen</label>
         <input type="url" name="url" id="url" required>
         <label for="date">Fecha</label>
         <input type="date" name="date" id="date" required>
@@ -20,6 +21,6 @@
     <!-- Mostrar un mensaje de confirmación si el usuario acaba de insertar una imagen en la 'base de datos'-->
     <% if (isImagePosted) { %>
         <div id="message" class="container alert success">Imagen insertada correctamente</div>
-        <% } %>
+    <% } %>
 </body>
 </html>
