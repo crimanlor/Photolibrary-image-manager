@@ -10,3 +10,7 @@
 .alert.success {
     background-color: #04AA6D;
 }
+
+.alert.error {
+    background-color: red;
+}

@@ -36,7 +36,8 @@ app.get('/add-image-form', (req, res) => {
 
     // Lee el parámetro de la URL, para cuando hagamos get de form al añadir una imagen
     const isImagePosted = req.query.isImagePosted === 'true';
-    res.render('form', { isImagePosted });
+    const urlExist = req.query.urlExist === 'false';
+    res.render('form', { isImagePosted, urlExist });
 })
 
     // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
@@ -47,13 +48,24 @@ app.get('/add-image-form', (req, res) => {
     
         // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
         const { title, url, date } = req.body
-        images.push({ title, url, date })
-        console.log('array de imagenes actualizado: ', images);
 
-        // 4julio: Tras insertar una imagen, se le avisará al usuario que se ha añadido la imagen 'dejaremos' el formulario visible.
-        res.render('form', {
-            isImagePosted: true
-        });
+        // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
+        urlExist = images.some(image => image.url === url.trim());
+        
+        if(urlExist){
+            res.render('form', {
+                isImagePosted: false,
+                urlExist: true
+            });
+        } else {
+            images.push({ title, url: url.trim(), date })
+            console.log('array de imagenes actualizado: ', images);
+            res.render('form', {
+                isImagePosted: true,
+                urlExist: false
+            });
+        }
+        
 })
 
 

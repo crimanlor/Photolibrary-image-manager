@@ -21,6 +21,8 @@
     <!-- Mostrar un mensaje de confirmación si el usuario acaba de insertar una imagen en la 'base de datos'-->
     <% if (isImagePosted) { %>
         <div id="message" class="container alert success">Imagen insertada correctamente</div>
+    <% } else if (urlExist) { %> 
+        <div id="message" class="container alert error">La URL ya existe en el array de imágenes.</div>
     <% } %>
 </body>
 </html>
