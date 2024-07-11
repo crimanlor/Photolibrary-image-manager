@@ -21,14 +21,26 @@ app.use(morgan('tiny'));
 app.set('view engine', 'ejs');
 
 // Definir "Base de datos":
-const images = [];
+const images = [
+    {
+        title: "happy cat",
+        url: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
+        date: "2024/07/14"
+    }, {
+        title: "happy dog",
+        url: "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        date: "2024/07/20"
+    }
+];
 
 // DEFINIR QUÉ VAMOS A MOSTRAR AL CLIENTE CON CADA PETICION
 // Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
 app.get('/', (req, res) => {
 
-    // 2. Usar en el home.ejs el forEach para iterar por todas las imágenes de la variable 'images'. Mostrar de momento solo el título 
-    res.render('home', { images });
+    // Ordenar las imágenes ordenadas por fecha:
+    const sortedImages = [...images].sort((a, b) => new Date(b.date) - new Date(a.date));
+    res.render('home', { images: sortedImages });
+
 })
 
 // Cuando nos hagan una petición GET a '/add-image-form' renderizamos el form
@@ -50,7 +62,6 @@ app.get('/add-image-form', (req, res) => {
         const { title, url, date } = req.body
 
         const titleInUpperCase = title.toUpperCase();
-
     
         // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
         urlExist = images.some(image => image.url === url.trim());
