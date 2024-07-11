@@ -15,6 +15,10 @@
     background-color: red;
 }
 
+.submit.btn {
+    width: 200px;
+}
+
 /* Estilos generales para la grid */
 .grid {
     display: grid;
@@ -66,7 +70,7 @@
 }
 
 @media (max-width: 768px) {
-    .card {
+    .card, .submit.btn {
         width: 100%; /* Ajustar el ancho al 100% del contenedor padre */
         max-width: 300px; /* Definir un máximo para que no se expanda demasiado en pantallas grandes */
     }
