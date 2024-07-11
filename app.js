@@ -49,6 +49,9 @@ app.get('/add-image-form', (req, res) => {
         // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
         const { title, url, date } = req.body
 
+        const titleInUpperCase = title.toUpperCase();
+
+    
         // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
         urlExist = images.some(image => image.url === url.trim());
         
@@ -58,7 +61,7 @@ app.get('/add-image-form', (req, res) => {
                 urlExist: true
             });
         } else {
-            images.push({ title, url: url.trim(), date })
+            images.push({ title: titleInUpperCase, url: url.trim(), date })
             console.log('array de imagenes actualizado: ', images);
             res.render('form', {
                 isImagePosted: true,

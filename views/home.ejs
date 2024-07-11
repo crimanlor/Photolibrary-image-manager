@@ -19,6 +19,7 @@
                 <% for (const image of images) {%>
                 <article>
                        <header><%= image.title %></header> 
+                       <p><%= image.date %></p> 
                        <div><img src="<%= image.url  %>" alt="<%= image.title %>"></div>
                 </article>
                 <%} %>
@@ -26,3 +27,4 @@
         </main>
     </body>
 </html>
+
