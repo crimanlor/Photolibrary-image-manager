@@ -43,45 +43,47 @@ app.get('/', (req, res) => {
 
 })
 
-// Cuando nos hagan una petición GET a '/add-image-form' renderizamos el form
+// Cuando nos hagan una petición GET a '/add-image-form' renderizamos el form.ejs
 app.get('/add-image-form', (req, res) => {
 
-    // Lee el parámetro de la URL, para cuando hagamos get de form al añadir una imagen
+    // Accede a los siguientes parámetros de la URL, para cuando hagamos get de form al añadir una imagen:
+    // Se usa para indicar si la imagen fue correctamente añadida o no.
     const isImagePosted = req.query.isImagePosted === 'true';
+    //  Se usa para indicar si la URL ya existe en la base de datos.
     const urlExist = req.query.urlExist === 'false';
+    // Renderiza el form con las variables anteriores por argumento, con los valores definidos inicialmente.
     res.render('form', { isImagePosted, urlExist });
 })
 
-    // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
-    app.post('/add-image-form', (req, res) => {
+// Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
+app.post('/add-image-form', (req, res) => {
 
-        // Todos los datos vienen del objeto req.body
-        console.log(req.body)
-    
-        // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
-        const { title, url, date } = req.body
+    // Todos los datos vienen del objeto req.body
+    console.log(req.body)
 
-        const titleInUpperCase = title.toUpperCase();
+    // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
+    const { title, url, date } = req.body
+    // Title tiene que mostrarse en mayúsculas:
+    const titleInUpperCase = title.toUpperCase();
+
+    // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
+    urlExist = images.some(image => image.url === url.trim());
     
-        // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
-        urlExist = images.some(image => image.url === url.trim());
-        
-        if(urlExist){
-            res.render('form', {
-                isImagePosted: false,
-                urlExist: true
-            });
-        } else {
-            images.push({ title: titleInUpperCase, url: url.trim(), date })
-            console.log('array de imagenes actualizado: ', images);
-            res.render('form', {
-                isImagePosted: true,
-                urlExist: false
-            });
-        }
+    if(urlExist){
+        res.render('form', {
+            isImagePosted: false,
+            urlExist: true
+        });
+    } else {
+        images.push({ title: titleInUpperCase, url: url.trim(), date })
+        console.log('array de imagenes actualizado: ', images);
+        res.render('form', {
+            isImagePosted: true,
+            urlExist: false
+        });
+    }
         
 })
-
 
 // PUERTO DE ESCUCHA PARA EL SERVIDOR
 app.listen('3000', (rep, res) => {
