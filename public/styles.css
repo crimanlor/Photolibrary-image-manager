@@ -68,8 +68,13 @@
     margin: 0 auto; /* Para centrar la imagen en la card */
 }
 
+.color-box {
+    padding: 10px;
+    color: white;
+}
+
 @media (max-width: 768px) {
-    .card, .submit.btn {
+    .submit.btn {
         width: 100%; /* Ajustar el ancho al 100% del contenedor padre */
         max-width: 300px; /* Definir un máximo para que no se expanda demasiado en pantallas grandes */
     }

@@ -1,6 +1,7 @@
 // Módulos de terceros
 const express = require('express');
 const morgan = require('morgan');
+const { getColorFromURL } = require('color-thief-node');
 
 // Crear instancia servidor Express
 const app = express();
@@ -25,11 +26,13 @@ const images = [
     {
         title: "happy cat",
         url: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
-        date: "2024/07/14"
+        date: "2024/07/14",
+        dominantColor: [133, 133, 133]
     }, {
         title: "happy dog",
         url: "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        date: "2024/07/20"
+        date: "2024/07/20",
+        dominantColor: [200, 150, 100]
     }
 ];
 
@@ -56,13 +59,14 @@ app.get('/add-image-form', (req, res) => {
 })
 
 // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
-app.post('/add-image-form', (req, res) => {
+app.post('/add-image-form', async (req, res) => {
 
     // Todos los datos vienen del objeto req.body
     console.log(req.body)
 
     // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
     const { title, url, date } = req.body
+
     // Title tiene que mostrarse en mayúsculas:
     const titleInUpperCase = title.toUpperCase();
 
@@ -75,7 +79,9 @@ app.post('/add-image-form', (req, res) => {
             urlExist: true
         });
     } else {
-        images.push({ title: titleInUpperCase, url: url.trim(), date })
+        // Obtener color predominante de la url
+        const dominantColor = await getColorFromURL(url.trim());
+        images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
         console.log('array de imagenes actualizado: ', images);
         res.render('form', {
             isImagePosted: true,
@@ -84,6 +90,7 @@ app.post('/add-image-form', (req, res) => {
     }
         
 })
+
 
 // PUERTO DE ESCUCHA PARA EL SERVIDOR
 app.listen('3000', (rep, res) => {

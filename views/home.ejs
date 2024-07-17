@@ -23,6 +23,11 @@
                        <div class="image-container">
                             <img src="<%= image.url  %>" alt="<%= image.title %>">
                         </div>
+                        <% if (image.dominantColor) { %>
+                            <div class="color-box" style="background-color: rgb(<%= image.dominantColor[0] %>, <%= image.dominantColor[1] %>, <%= image.dominantColor[2] %>);">
+                                RGB(<%= image.dominantColor[0] %>, <%= image.dominantColor[1] %>, <%= image.dominantColor[2] %>)
+                            </div>
+                        <% } %>
                 </article>
                 <%} %>
             </section>
