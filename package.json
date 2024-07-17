@@ -15,5 +15,8 @@
     "express": "^4.19.2",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4"
+  },
+  "dependencies": {
+    "color-thief-node": "^1.0.4"
   }
 }
