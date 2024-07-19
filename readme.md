@@ -75,3 +75,8 @@ const { getColorFromURL } = require("color-thief-node");
   console.log(color);
 })();
 ```
+
+## Deployment
+
+The application is deployed and can be accessed at the following URL:
+[PhotoLibrary Image Manager](https://photolibrary-image-manager.onrender.com/)

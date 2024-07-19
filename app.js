@@ -24,15 +24,20 @@ app.set('view engine', 'ejs');
 // Definir "Base de datos":
 const images = [
     {
-        title: "happy cat",
+        title: "Happy Cat",
         url: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
         date: "2024/07/14",
         dominantColor: [133, 133, 133]
     }, {
-        title: "happy dog",
+        title: "Cute Dog",
         url: "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         date: "2024/07/20",
         dominantColor: [200, 150, 100]
+    }, {
+        title: "Awesome Zebras",
+        url: "https://images.pexels.com/photos/247376/pexels-photo-247376.jpeg?auto=compress&cs=tinysrgb&w=800",
+        date: "2024/07/22",
+        dominantColor: [109, 130, 46]
     }
 ];
 
