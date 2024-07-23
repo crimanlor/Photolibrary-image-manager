@@ -11,7 +11,7 @@
     <form class="container" action="/add-image-form" method="post">
         <label for="title">Nombre</label>
         <!-- 3. Añadir los otros campos del formulario y sus validaciones -->
-        <input type="text" name="title" id="title" maxlength="30" pattern="[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?: [A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*" required>
+        <input type="text" name="title" id="title" maxlength="30" pattern="[0-9A-Za-z\s_]+" required title="Los títulos de las imágenes solo pueden contener; mayúsculas, minúsculas, números, espacios en blanco y guión bajo">
         <label for="url">URL imagen</label>
         <input type="url" name="url" id="url" required>
         <label for="date">Fecha</label>
