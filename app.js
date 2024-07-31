@@ -2,6 +2,25 @@
 const express = require('express');
 const morgan = require('morgan');
 const { getColorFromURL } = require('color-thief-node');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
+// CONEXIÓN BASE DE DATOS
+// Connection string: el string donde especificamos usuario:contraseña y URL de conexión 
+// Unique Resource Identifier
+const uri = "mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }}
+);
+
+// Variable global para gestionar base de datos
+let database;
+
 
 // Crear instancia servidor Express
 const app = express();
@@ -86,8 +105,16 @@ app.post('/add-image-form', async (req, res) => {
     } else {
         // Obtener color predominante de la url
         const dominantColor = await getColorFromURL(url.trim());
-        images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
-        console.log('array de imagenes actualizado: ', images);
+        // images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
+        // console.log('array de imagenes actualizado: ', images);
+
+        database.collection('images').insertOne({
+            title,
+            url,
+            date: new Date(date),
+            dominantColor
+        });
+
         res.render('form', {
             isImagePosted: true,
             urlExist: false
@@ -98,6 +125,19 @@ app.post('/add-image-form', async (req, res) => {
 
 
 // PUERTO DE ESCUCHA PARA EL SERVIDOR
-app.listen('3000', (rep, res) => {
+app.listen(process.env.PORT || 3000, async () => {
     console.log("Servidor escuchando correctamente en el puerto 3000.")
+    
+    try {
+        await client.connect();
+
+        // seleccionar base de datos
+        database = client.db("ironhack");
+
+        // Mensaje de confirmación de que nos hemos conectado a la base de datos
+        console.log("Conexión a la base de datos OK.")
+
+    } catch (err) {
+        console.error(err);
+    }
 });

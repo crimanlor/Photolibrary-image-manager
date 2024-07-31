@@ -17,6 +17,7 @@
     "morgan": "^1.10.0"
   },
   "dependencies": {
-    "color-thief-node": "^1.0.4"
+    "color-thief-node": "^1.0.4",
+    "mongodb": "^6.8.0"
   }
 }
