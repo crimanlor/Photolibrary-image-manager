@@ -1,126 +1,192 @@
-// Módulos de terceros
+// importar módulos de terceros
 const express = require('express');
 const morgan = require('morgan');
 const { getColorFromURL } = require('color-thief-node');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const mongoose = require('mongoose');
 
-// CONEXIÓN BASE DE DATOS
-// Connection string: el string donde especificamos usuario:contraseña y URL de conexión 
-// Unique Resource Identifier
-const uri = "mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }}
-);
+// 1. Conexión a la base de datos con Mongoose
+main().catch(err => console.Console(err));
 
-// Variable global para gestionar base de datos
-let database;
+// Variable global para almacenar el modelo
+let Image;
 
-// Crear instancia servidor Express
+async function main() {
+    await mongoose.connect('mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/ironhack')
+
+    // 2. Crear Schema
+    const imageSchema = new mongoose.Schema({
+        title: {
+            type: String,
+            max: [30, 'El nombre no puede tener más de 30 caracteres'],
+            match: /[0-9A-Za-z\s_]+/,
+            required: true
+        },
+        url: {
+            type: String,
+            match: [ /^(https):\/\/[^\s/$.?#].[^\s]*$/i,
+            'Por favor ingrese una URL válida'],
+            required: true
+        },
+        date: {
+            type: Date,
+            required: true
+        },
+        dominantColor: {
+            type: [Number],
+            required: true
+        }
+    });
+
+    // 3. Asociar Schema a Model
+    Image = mongoose.model('Image', imageSchema);
+
+    // 4. Crear una imagen y guardarla
+    // const image = new Image({
+    //     title: 'DOG',
+    //     url: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    //     date: '2024-08-07T00:00:00Z',
+    //     dominantColor: [200, 150, 100]
+    // });
+
+    // try {
+    //     await image.save();
+    // } catch(err){
+    //     console.log('Ha ocurrido un error al guardar el documento', err.message);
+    // }
+  
+
+}
+
+// creamos una instancia del servidor Express
 const app = express();
 
-// MIDDLEWARES:
-// Gestionar peticiones post
-app.use(express.urlencoded({extended: true}));
+// Tenemos que usar un nuevo middleware para indicar a Express que queremos procesar peticiones de tipo POST
+app.use(express.urlencoded({ extended: true }));
 
-// Peticiones get del cliente a recursos públicos
+// Añadimos el middleware necesario para que el client puedo hacer peticiones GET a los recursos públicos de la carpeta 'public'
 app.use(express.static('public'));
 
-// Loguear peticiones del cliente
-app.use(morgan('tiny'));
+// Varible para indicar en que puerto tiene que escuchar nuestra app
+// process.env.PORT en render.com
+// 3000 lo quiero usar para desarrollo local 
+console.log("valor del PORT: ", process.env.PORT)
+const PORT = process.env.PORT || 4000;
 
-// OTRAS CONFIGURACIONES
-// Especificar a Express que quiero utilizar EJS como motor de plantillas
+// Especificar a Express que quiero usar EJS como motor de plantillas
 app.set('view engine', 'ejs');
 
-// DEFINIR QUÉ VAMOS A MOSTRAR AL CLIENTE CON CADA PETICION
+// Usamos el middleware morgan para loguear las peticiones del cliente
+app.use(morgan('tiny'));
+
 // Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
 app.get('/', async (req, res) => {
+    // 2. Usar en el home.ejs el forEach para iterar por todas las imágenes de la variable 'images'. Mostrar de momento solo el título 
+    const images = await Image.find();
+    
+    res.render('home', {
+        images
+    });
+});
 
-    const images = await database.collection('images').find().toArray()
+/**
+ * 
+ * @param {string} s1 String principal. Cadena de texto donde vamos a realizar la búsqueda 
+ * @param {string} s2 String secundario.  
+ * @returns string Retorna true si s2 está contenido en s1. En caso contrario retorna false
+ */
+function isSubstring(s1, s2) {
+    const regexp = new RegExp(s2, "i");
 
-    // Ordenar las imágenes ordenadas por fecha:
-    const sortedImages = [...images].sort((a, b) => new Date(b.date) - new Date(a.date));
-    res.render('home', { images: sortedImages });
+    // Busco en el string s1 si contiene el string s2
+    const result = regexp.test(s1);
+}
 
-})
 
-// Cuando nos hagan una petición GET a '/add-image-form' renderizamos el form.ejs
+// Cuando nos hagan una petición GET a '/add-image-form' renderizamos 
 app.get('/add-image-form', (req, res) => {
-
-    // Accede a los siguientes parámetros de la URL, para cuando hagamos get de form al añadir una imagen:
     // Se usa para indicar si la imagen fue correctamente añadida o no.
     const isImagePosted = req.query.isImagePosted === 'true';
     //  Se usa para indicar si la URL ya existe en la base de datos.
     const urlExist = req.query.urlExist === 'false';
     // Renderiza el form con las variables anteriores por argumento, con los valores definidos inicialmente.
     res.render('form', { isImagePosted, urlExist });
-})
+});
+
+
 
 // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
-app.post('/add-image-form', async (req, res) => {
+app.post('/add-image-form', async (req, res, next) => {
+    let dominantColor;
+    let isRepeated;
+    const { title, url, date } = req.body;
 
-    // Todos los datos vienen del objeto req.body
-    console.log(req.body)
+    try {
+        console.log(req.body);
 
-    // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
-    const { title, url, date } = req.body
+        // 1. Validación del título
+        const regexp = /^[0-9A-Z\s_]+$/i;
+        if (title.length > 30 || !regexp.test(title)) {
+            return res.status(400).send('Algo ha salido mal...');
+        }
 
-    // Title tiene que mostrarse en mayúsculas:
-    const titleInUpperCase = title.toUpperCase();
+         // 2. Verificar si la imagen ya existe en la base de datos (isRepeated)
+         const isRepeated = await Image.exists({ url: url.trim() });
+         if (isRepeated) {
+             return res.render('form', {
+                 isImagePosted: false,
+                 imageRepeated: url
+             });
+         }
 
-    // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
+        // 3. Extraer el color predominante
+        dominantColor = await getColorFromURL(url);
 
-    // Con MongoDB
-    urlExist = await database.collection('images').findOne({ url: url.trim() });
-    
-    if(urlExist){
-        res.render('form', {
-            isImagePosted: false,
-            urlExist: true
-        });
-    } else {
-        // Obtener color predominante de la url
-        const dominantColor = await getColorFromURL(url.trim());
-        // Comento la siguiente línea, cuando las imágenes se añaden a la DB real en lugar de al array de imágenes que teníamos inicialmente
-        // images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
-        // console.log('array de imagenes actualizado: ', images);
-
-        database.collection('images').insertOne({
-            titleInUpperCase,
-            url,
-            date: new Date(date),
+        // 4. Crear y guardar el documento en la base de datos
+        const newImage = new Image({
+            title: title.toUpperCase().trim(),
+            url: url.trim(),
+            date: date ? new Date(date) : undefined,
             dominantColor
         });
 
+        await newImage.save();
+
+        // 5. Renderizar el formulario con éxito
         res.render('form', {
             isImagePosted: true,
-            urlExist: false
+            imageRepeated: undefined
         });
+
+    } catch (err) {
+        console.log('Ha ocurrido un error: ', err);
+
+        // Manejo de errores específicos
+        if (err.message.includes('Unsupported image type')) {
+            return res.status(400).send('No hemos podido obtener el color predominante de la imagen. Por favor, prueba otra URL diferente.');
+        }
+
+        // Redirigir al manejador de errores global
+        return next(err);
     }
-        
+
+});
+
+
+// en el futuro es normal que tengamos endpoints como
+// app.get('/edit-image-form')
+
+/** Uso de middleware para gestionar cualquier error imprevisto de nuestra aplicaicón y fallar de forma grácil */
+app.use((err, req, res, next) => {
+    // err.message -> simplemente el mensaje
+    // err.stack -> la pila de llamadas
+    console.error(err)
+    // Enviar un correo electronico o cualquier otro medio a los desarrolladores para que se den cuenta de que algo ha 'petao'
+    res.status(500).send('<p>Ups! La operación ha fallado. Vuelve a probarlo más tarde.Regresa a la <a href="/">home page</a></p> ');
 })
 
 
-// PUERTO DE ESCUCHA PARA EL SERVIDOR
-app.listen(process.env.PORT || 3000, async () => {
-    console.log("Servidor escuchando correctamente en el puerto 3000.")
-    
-    try {
-        await client.connect();
 
-        // seleccionar base de datos
-        database = client.db("ironhack");
-
-        // Mensaje de confirmación de que nos hemos conectado a la base de datos
-        console.log("Conexión a la base de datos OK.")
-
-    } catch (err) {
-        console.error(err);
-    }
+app.listen(PORT, (req, res) => {
+    console.log("Servidor escuchando correctamente en el puerto " + PORT);
 });

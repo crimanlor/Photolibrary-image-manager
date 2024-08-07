@@ -18,8 +18,8 @@
             <section class="grid">
                 <% for (const image of images) {%>
                 <article class="card">
-                       <h1><%= image.titleInUpperCase %></h1> 
-                       <p><%= image.date %></p> 
+                       <h1><%= image.title %></h1> 
+                       <p><%= image.date.toISOString().split('T')[0] %></p> 
                        <div class="image-container">
                             <img src="<%= image.url  %>" alt="<%= image.title %>">
                         </div>
