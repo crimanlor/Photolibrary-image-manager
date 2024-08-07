@@ -21,7 +21,6 @@ const client = new MongoClient(uri, {
 // Variable global para gestionar base de datos
 let database;
 
-
 // Crear instancia servidor Express
 const app = express();
 
@@ -109,7 +108,7 @@ app.post('/add-image-form', async (req, res) => {
         // console.log('array de imagenes actualizado: ', images);
 
         database.collection('images').insertOne({
-            title,
+            titleInUpperCase,
             url,
             date: new Date(date),
             dominantColor
