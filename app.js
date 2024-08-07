@@ -34,30 +34,9 @@ app.use(express.static('public'));
 // Loguear peticiones del cliente
 app.use(morgan('tiny'));
 
-
 // OTRAS CONFIGURACIONES
 // Especificar a Express que quiero utilizar EJS como motor de plantillas
 app.set('view engine', 'ejs');
-
-// Definir "Base de datos":
-const images = [
-    {
-        title: "HAPPY CAT",
-        url: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
-        date: "2024/07/14",
-        dominantColor: [133, 133, 133]
-    }, {
-        title: "CUTE DOG",
-        url: "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        date: "2024/07/20",
-        dominantColor: [200, 150, 100]
-    }, {
-        title: "AWESOME ZEBRAS",
-        url: "https://images.pexels.com/photos/247376/pexels-photo-247376.jpeg?auto=compress&cs=tinysrgb&w=800",
-        date: "2024/07/22",
-        dominantColor: [109, 130, 46]
-    }
-];
 
 // DEFINIR QUÉ VAMOS A MOSTRAR AL CLIENTE CON CADA PETICION
 // Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
@@ -96,7 +75,9 @@ app.post('/add-image-form', async (req, res) => {
     const titleInUpperCase = title.toUpperCase();
 
     // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
-    urlExist = images.some(image => image.url === url.trim());
+
+    // Con MongoDB
+    urlExist = await database.collection('images').findOne({ url: url.trim() });
     
     if(urlExist){
         res.render('form', {
@@ -106,6 +87,7 @@ app.post('/add-image-form', async (req, res) => {
     } else {
         // Obtener color predominante de la url
         const dominantColor = await getColorFromURL(url.trim());
+        // Comento la siguiente línea, cuando las imágenes se añaden a la DB real en lugar de al array de imágenes que teníamos inicialmente
         // images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
         // console.log('array de imagenes actualizado: ', images);
 
