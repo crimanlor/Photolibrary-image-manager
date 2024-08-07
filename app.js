@@ -1,4 +1,4 @@
-// importar módulos de terceros
+// Importar módulos de terceros
 const express = require('express');
 const morgan = require('morgan');
 const { getColorFromURL } = require('color-thief-node');
@@ -41,7 +41,8 @@ async function main() {
     // 3. Asociar Schema a Model
     Image = mongoose.model('Image', imageSchema);
 
-    // 4. Crear una imagen y guardarla
+    // 4. Crear una imagen y guardarla (Comentado para que no se cree una imagen de prueba cada vez que levanto el servidor)
+
     // const image = new Image({
     //     title: 'DOG',
     //     url: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -54,17 +55,15 @@ async function main() {
     // } catch(err){
     //     console.log('Ha ocurrido un error al guardar el documento', err.message);
     // }
-  
-
 }
 
-// creamos una instancia del servidor Express
+// Creamos una instancia del servidor Express
 const app = express();
 
 // Tenemos que usar un nuevo middleware para indicar a Express que queremos procesar peticiones de tipo POST
 app.use(express.urlencoded({ extended: true }));
 
-// Añadimos el middleware necesario para que el client puedo hacer peticiones GET a los recursos públicos de la carpeta 'public'
+// Añadimos el middleware necesario para que el client puedA hacer peticiones GET a los recursos públicos de la carpeta 'public'
 app.use(express.static('public'));
 
 // Varible para indicar en que puerto tiene que escuchar nuestra app
@@ -79,31 +78,15 @@ app.set('view engine', 'ejs');
 // Usamos el middleware morgan para loguear las peticiones del cliente
 app.use(morgan('tiny'));
 
-// Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
+// Cuando nos hagan una petición GET a '/' renderizamos la home.ejs con las imágenes que vienen de la DB y ordenadas por fecha
 app.get('/', async (req, res) => {
-    // 2. Usar en el home.ejs el forEach para iterar por todas las imágenes de la variable 'images'. Mostrar de momento solo el título 
-    const images = await Image.find();
-    
+    const images = await Image.find().sort({ date: -1});  
     res.render('home', {
         images
     });
 });
 
-/**
- * 
- * @param {string} s1 String principal. Cadena de texto donde vamos a realizar la búsqueda 
- * @param {string} s2 String secundario.  
- * @returns string Retorna true si s2 está contenido en s1. En caso contrario retorna false
- */
-function isSubstring(s1, s2) {
-    const regexp = new RegExp(s2, "i");
-
-    // Busco en el string s1 si contiene el string s2
-    const result = regexp.test(s1);
-}
-
-
-// Cuando nos hagan una petición GET a '/add-image-form' renderizamos 
+// Cuando nos hagan una petición GET a '/add-image-form' renderizamos el formulario
 app.get('/add-image-form', (req, res) => {
     // Se usa para indicar si la imagen fue correctamente añadida o no.
     const isImagePosted = req.query.isImagePosted === 'true';
@@ -112,8 +95,6 @@ app.get('/add-image-form', (req, res) => {
     // Renderiza el form con las variables anteriores por argumento, con los valores definidos inicialmente.
     res.render('form', { isImagePosted, urlExist });
 });
-
-
 
 // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
 app.post('/add-image-form', async (req, res, next) => {
