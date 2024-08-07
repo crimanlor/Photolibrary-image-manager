@@ -61,7 +61,9 @@ const images = [
 
 // DEFINIR QUÉ VAMOS A MOSTRAR AL CLIENTE CON CADA PETICION
 // Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+
+    const images = await database.collection('images').find().toArray()
 
     // Ordenar las imágenes ordenadas por fecha:
     const sortedImages = [...images].sort((a, b) => new Date(b.date) - new Date(a.date));

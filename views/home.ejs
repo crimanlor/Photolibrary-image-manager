@@ -18,7 +18,7 @@
             <section class="grid">
                 <% for (const image of images) {%>
                 <article class="card">
-                       <h1><%= image.title %></h1> 
+                       <h1><%= image.titleInUpperCase %></h1> 
                        <p><%= image.date %></p> 
                        <div class="image-container">
                             <img src="<%= image.url  %>" alt="<%= image.title %>">
