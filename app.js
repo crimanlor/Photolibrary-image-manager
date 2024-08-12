@@ -5,11 +5,9 @@ const { getColorFromURL } = require('color-thief-node');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 // CONEXIÓN BASE DE DATOS
-// Connection string: el string donde especificamos usuario:contraseña y URL de conexión 
-// Unique Resource Identifier
 const uri = "mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// Crear un MongoClient con un objeto MongoClientOptions para establecer la versión estable de la API
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -35,37 +33,42 @@ app.use(express.static('public'));
 app.use(morgan('tiny'));
 
 // OTRAS CONFIGURACIONES
+
 // Especificar a Express que quiero utilizar EJS como motor de plantillas
 app.set('view engine', 'ejs');
 
 // DEFINIR QUÉ VAMOS A MOSTRAR AL CLIENTE CON CADA PETICION
+
 // Cuando nos hagan una petición GET a '/' renderizamos la home.ejs
 app.get('/', async (req, res) => {
-
     const images = await database.collection('images').find().toArray()
 
-    // Ordenar las imágenes ordenadas por fecha:
+    // Ordenar las imágenes por fecha:
     const sortedImages = [...images].sort((a, b) => new Date(b.date) - new Date(a.date));
-    res.render('home', { images: sortedImages });
 
+    // Renderizar la home con las imágenes ordenadas por fecha
+    res.render('home', { images: sortedImages });
 })
 
 // Cuando nos hagan una petición GET a '/add-image-form' renderizamos el form.ejs
 app.get('/add-image-form', (req, res) => {
 
-    // Accede a los siguientes parámetros de la URL, para cuando hagamos get de form al añadir una imagen:
-    // Se usa para indicar si la imagen fue correctamente añadida o no.
+    // Accede a los siguientes parámetros de la URL, cuando hagamos get de form al añadir una imagen:
+
+    // Para indicar si la imagen fue correctamente añadida o no.
     const isImagePosted = req.query.isImagePosted === 'true';
-    //  Se usa para indicar si la URL ya existe en la base de datos.
+
+    //  Para indicar si la URL ya existe en la base de datos.
     const urlExist = req.query.urlExist === 'false';
-    // Renderiza el form con las variables anteriores por argumento, con los valores definidos inicialmente.
+
+    // Renderizar el form con las variables anteriores por argumento, con los valores definidos inicialmente.
     res.render('form', { isImagePosted, urlExist });
 })
 
 // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
 app.post('/add-image-form', async (req, res) => {
 
-    // Todos los datos vienen del objeto req.body
+    // Mostrar para ver si están llegando bien todos los datos vienen del objeto req.body
     console.log(req.body)
 
     // Extraemos la propiedad del objeto que tenemos que añadir al formulario y la añadimos al array de images
@@ -74,9 +77,8 @@ app.post('/add-image-form', async (req, res) => {
     // Title tiene que mostrarse en mayúsculas:
     const titleInUpperCase = title.toUpperCase();
 
-    // URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
+    // Funcionalidad URL Existente: Si la URL ya existe en la base de datos del servidor, no se añade al almacén de imágenes y se muestra un mensaje al usuario indicándolo.
 
-    // Con MongoDB
     urlExist = await database.collection('images').findOne({ url: url.trim() });
     
     if(urlExist){
@@ -85,12 +87,10 @@ app.post('/add-image-form', async (req, res) => {
             urlExist: true
         });
     } else {
-        // Obtener color predominante de la url
+        // Funcionalidad Obtener color predominante de la url
         const dominantColor = await getColorFromURL(url.trim());
-        // Comento la siguiente línea, cuando las imágenes se añaden a la DB real en lugar de al array de imágenes que teníamos inicialmente
-        // images.push({ title: titleInUpperCase, url: url.trim(), date, dominantColor })
-        // console.log('array de imagenes actualizado: ', images);
 
+        // Añadir la imagen/documento a la DB
         database.collection('images').insertOne({
             titleInUpperCase,
             url,
@@ -106,7 +106,6 @@ app.post('/add-image-form', async (req, res) => {
         
 })
 
-
 // PUERTO DE ESCUCHA PARA EL SERVIDOR
 app.listen(process.env.PORT || 3000, async () => {
     console.log("Servidor escuchando correctamente en el puerto 3000.")
@@ -114,10 +113,10 @@ app.listen(process.env.PORT || 3000, async () => {
     try {
         await client.connect();
 
-        // seleccionar base de datos
+        // Seleccionar base de datos
         database = client.db("ironhack");
 
-        // Mensaje de confirmación de que nos hemos conectado a la base de datos
+        // Mensaje de confirmación
         console.log("Conexión a la base de datos OK.")
 
     } catch (err) {
