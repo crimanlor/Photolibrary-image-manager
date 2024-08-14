@@ -98,6 +98,10 @@ app.post('/add-image-form', async (req, res) => {
 
 
 // PUERTO DE ESCUCHA PARA EL SERVIDOR
-app.listen('3000', (rep, res) => {
-    console.log("Servidor escuchando correctamente en el puerto 3000.")
+app.listen(3000, (err) => {
+    if (err) {
+        console.error('Error al iniciar el servidor:', err);
+    } else {
+        console.log("Servidor escuchando correctamente en el puerto 3000.");
+    }
 });
