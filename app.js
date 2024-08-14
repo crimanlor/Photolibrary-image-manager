@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 
 // 1. Conexión a la base de datos con Mongoose
-main().catch(err => console.Console(err));
+main().catch(err => console.error(err));
 
 // Variable global para almacenar el modelo
 let Image;
