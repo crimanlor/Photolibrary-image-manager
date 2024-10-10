@@ -109,15 +109,6 @@ app.post('/add-image-form', async (req, res, next) => {
 
 });
 
-<<<<<<< HEAD
-// PUERTO DE ESCUCHA PARA EL SERVIDOR
-app.listen(3000, (err) => {
-    if (err) {
-        console.error('Error al iniciar el servidor:', err);
-    } else {
-        console.log("Servidor escuchando correctamente en el puerto 3000.");
-    }
-=======
 async function connectDB() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Conectado a la base de datos');
@@ -127,5 +118,4 @@ connectDB().catch(err => console.log(err))
 
 app.listen(PORT, (req, res) => {
     console.log("Servidor escuchando correctamente en el puerto " + PORT);
->>>>>>> jest-testing
 });
