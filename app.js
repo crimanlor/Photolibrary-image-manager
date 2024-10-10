@@ -1,61 +1,16 @@
 // Importar módulos de terceros
 const express = require('express');
 const morgan = require('morgan');
-const { getColorFromURL } = require('color-thief-node');
 const mongoose = require('mongoose');
+const { getColorFromURL } = require('color-thief-node');
+const dotenv = require('dotenv');
+dotenv.config();
 
+// Importar función comprobar si la imagen está repetida en la DB
+const { checkRepeatedImage } = require('./utils');
 
-// 1. Conexión a la base de datos con Mongoose
-main().catch(err => console.error(err));
-
-// Variable global para almacenar el modelo
-let Image;
-
-async function main() {
-    await mongoose.connect('mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/ironhack')
-
-    // 2. Crear Schema
-    const imageSchema = new mongoose.Schema({
-        title: {
-            type: String,
-            max: [30, 'El nombre no puede tener más de 30 caracteres'],
-            match: /[0-9A-Za-z\s_]+/,
-            required: true
-        },
-        url: {
-            type: String,
-            match: [ /^(https):\/\/[^\s/$.?#].[^\s]*$/i,
-            'Por favor ingrese una URL válida'],
-            required: true
-        },
-        date: {
-            type: Date,
-            required: true
-        },
-        dominantColor: {
-            type: [Number],
-            required: true
-        }
-    });
-
-    // 3. Asociar Schema a Model
-    Image = mongoose.model('Image', imageSchema);
-
-    // 4. Crear una imagen y guardarla (Comentado para que no se cree una imagen de prueba cada vez que levanto el servidor)
-
-    // const image = new Image({
-    //     title: 'DOG',
-    //     url: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    //     date: '2024-08-07T00:00:00Z',
-    //     dominantColor: [200, 150, 100]
-    // });
-
-    // try {
-    //     await image.save();
-    // } catch(err){
-    //     console.log('Ha ocurrido un error al guardar el documento', err.message);
-    // }
-}
+// Importar el modelo
+const Image = require('./models/image.model.js');
 
 // Creamos una instancia del servidor Express
 const app = express();
@@ -99,7 +54,6 @@ app.get('/add-image-form', (req, res) => {
 // Cuando nos hagan una petición POST a '/add-image-form' tenemos que recibir los datos del formulario y actualizar nuestra "base de datos"
 app.post('/add-image-form', async (req, res, next) => {
     let dominantColor;
-    let isRepeated;
     const { title, url, date } = req.body;
 
     try {
@@ -111,14 +65,16 @@ app.post('/add-image-form', async (req, res, next) => {
             return res.status(400).send('Algo ha salido mal...');
         }
 
-         // 2. Verificar si la imagen ya existe en la base de datos (isRepeated)
-         const isRepeated = await Image.exists({ url: url.trim() });
-         if (isRepeated) {
+         // 2. Verificar si la imagen ya existe en la base de datos
+        const repeatedResult = await checkRepeatedImage(url);
+        if (repeatedResult) {
+             // Si la imagen ya está repetida, renderiza y detén la ejecución
              return res.render('form', {
-                 isImagePosted: false,
-                 imageRepeated: url
-             });
-         }
+                isImagePosted: false,
+                imageRepeated: url,
+                urlExist: true
+            });
+        }
 
         // 3. Extraer el color predominante
         dominantColor = await getColorFromURL(url);
@@ -153,20 +109,12 @@ app.post('/add-image-form', async (req, res, next) => {
 
 });
 
+async function connectDB() {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Conectado a la base de datos');
+}
 
-// en el futuro es normal que tengamos endpoints como
-// app.get('/edit-image-form')
-
-/** Uso de middleware para gestionar cualquier error imprevisto de nuestra aplicaicón y fallar de forma grácil */
-app.use((err, req, res, next) => {
-    // err.message -> simplemente el mensaje
-    // err.stack -> la pila de llamadas
-    console.error(err)
-    // Enviar un correo electronico o cualquier otro medio a los desarrolladores para que se den cuenta de que algo ha 'petao'
-    res.status(500).send('<p>Ups! La operación ha fallado. Vuelve a probarlo más tarde.Regresa a la <a href="/">home page</a></p> ');
-})
-
-
+connectDB().catch(err => console.log(err))
 
 app.listen(PORT, (req, res) => {
     console.log("Servidor escuchando correctamente en el puerto " + PORT);
